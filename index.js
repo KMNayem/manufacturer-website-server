@@ -18,6 +18,7 @@ async function run(){
     try{
         await client.connect();
         const productCollection = client.db('pro_paint').collection('tools');
+        const orderCollection = client.db('pro_paint').collection('orders');
 
         app.get('/product', async(req, res) =>{
             const query = {};
@@ -33,6 +34,12 @@ async function run(){
           const product = await productCollection.findOne(query);
           res.send(product);
 
+        });
+
+        app.post('/order', async(req, res)=>{
+          const order = req.body;
+          const result = await orderCollection.insertOne(order);
+          res.send(result);
         })
 
         
