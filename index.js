@@ -15,6 +15,8 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+
 async function run(){
     try{
         await client.connect();
@@ -37,14 +39,20 @@ async function run(){
 
         app.put('/user/admin/:email', async (req, res) =>{
           const email = req.params.email;
-          
-          const filter = {email: email};
-         
+          const requester = req.decoded.email;
+          const requesterAccount = await userCollection.findOne({email: requester});
+          if(requesterAccount.role === 'admin'){
+            const filter = {email: email};
           const updateDoc ={
-          $set: {role: 'admin'},   
-        };
-        const result = await userCollection.updateOne(filter, updateDoc);
-        res.send(result);
+              $set: {role: 'admin'},   
+            };
+          const result = await userCollection.updateOne(filter, updateDoc);
+          res.send(result);
+          }
+          else{
+            res.status(403).send({message: 'forbidden'});
+          }
+          
 
         });
 
